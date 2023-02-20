@@ -1,0 +1,24 @@
+syntax="proto3";
+
+option go_package = "./proto";
+
+package employee_service;
+
+service EmployeeService{
+  rpc CreateEmployee(EmployeeRequest) returns (EmployeeResponse);
+  rpc GetEmployee(NoParams) returns (stream EmployeeRequest);
+}
+
+message NoParams{}
+
+message EmployeeRequest{
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+}
+
+message EmployeeResponse{
+  int32 id = 1;
+  bool result = 2;
+}
