@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	EmployeeService_CreateEmployee_FullMethodName = "/employee_service.EmployeeService/CreateEmployee"
-	EmployeeService_GetEmployee_FullMethodName    = "/employee_service.EmployeeService/GetEmployee"
+	EmployeeService_CreateEmployee_FullMethodName         = "/employee_service.EmployeeService/CreateEmployee"
+	EmployeeService_CreateMultipleEmployee_FullMethodName = "/employee_service.EmployeeService/CreateMultipleEmployee"
+	EmployeeService_GetEmployee_FullMethodName            = "/employee_service.EmployeeService/GetEmployee"
 )
 
 // EmployeeServiceClient is the client API for EmployeeService service.
@@ -28,6 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EmployeeServiceClient interface {
 	CreateEmployee(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
+	CreateMultipleEmployee(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_CreateMultipleEmployeeClient, error)
 	GetEmployee(ctx context.Context, in *NoParams, opts ...grpc.CallOption) (EmployeeService_GetEmployeeClient, error)
 }
 
@@ -48,8 +50,39 @@ func (c *employeeServiceClient) CreateEmployee(ctx context.Context, in *Employee
 	return out, nil
 }
 
+func (c *employeeServiceClient) CreateMultipleEmployee(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_CreateMultipleEmployeeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &EmployeeService_ServiceDesc.Streams[0], EmployeeService_CreateMultipleEmployee_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &employeeServiceCreateMultipleEmployeeClient{stream}
+	return x, nil
+}
+
+type EmployeeService_CreateMultipleEmployeeClient interface {
+	Send(*EmployeeRequest) error
+	Recv() (*EmployeeResponse, error)
+	grpc.ClientStream
+}
+
+type employeeServiceCreateMultipleEmployeeClient struct {
+	grpc.ClientStream
+}
+
+func (x *employeeServiceCreateMultipleEmployeeClient) Send(m *EmployeeRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *employeeServiceCreateMultipleEmployeeClient) Recv() (*EmployeeResponse, error) {
+	m := new(EmployeeResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *employeeServiceClient) GetEmployee(ctx context.Context, in *NoParams, opts ...grpc.CallOption) (EmployeeService_GetEmployeeClient, error) {
-	stream, err := c.cc.NewStream(ctx, &EmployeeService_ServiceDesc.Streams[0], EmployeeService_GetEmployee_FullMethodName, opts...)
+	stream, err := c.cc.NewStream(ctx, &EmployeeService_ServiceDesc.Streams[1], EmployeeService_GetEmployee_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +118,7 @@ func (x *employeeServiceGetEmployeeClient) Recv() (*EmployeeRequest, error) {
 // for forward compatibility
 type EmployeeServiceServer interface {
 	CreateEmployee(context.Context, *EmployeeRequest) (*EmployeeResponse, error)
+	CreateMultipleEmployee(EmployeeService_CreateMultipleEmployeeServer) error
 	GetEmployee(*NoParams, EmployeeService_GetEmployeeServer) error
 	mustEmbedUnimplementedEmployeeServiceServer()
 }
@@ -95,6 +129,9 @@ type UnimplementedEmployeeServiceServer struct {
 
 func (UnimplementedEmployeeServiceServer) CreateEmployee(context.Context, *EmployeeRequest) (*EmployeeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateEmployee not implemented")
+}
+func (UnimplementedEmployeeServiceServer) CreateMultipleEmployee(EmployeeService_CreateMultipleEmployeeServer) error {
+	return status.Errorf(codes.Unimplemented, "method CreateMultipleEmployee not implemented")
 }
 func (UnimplementedEmployeeServiceServer) GetEmployee(*NoParams, EmployeeService_GetEmployeeServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetEmployee not implemented")
@@ -128,6 +165,32 @@ func _EmployeeService_CreateEmployee_Handler(srv interface{}, ctx context.Contex
 		return srv.(EmployeeServiceServer).CreateEmployee(ctx, req.(*EmployeeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _EmployeeService_CreateMultipleEmployee_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EmployeeServiceServer).CreateMultipleEmployee(&employeeServiceCreateMultipleEmployeeServer{stream})
+}
+
+type EmployeeService_CreateMultipleEmployeeServer interface {
+	Send(*EmployeeResponse) error
+	Recv() (*EmployeeRequest, error)
+	grpc.ServerStream
+}
+
+type employeeServiceCreateMultipleEmployeeServer struct {
+	grpc.ServerStream
+}
+
+func (x *employeeServiceCreateMultipleEmployeeServer) Send(m *EmployeeResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *employeeServiceCreateMultipleEmployeeServer) Recv() (*EmployeeRequest, error) {
+	m := new(EmployeeRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func _EmployeeService_GetEmployee_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -164,6 +227,12 @@ var EmployeeService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "CreateMultipleEmployee",
+			Handler:       _EmployeeService_CreateMultipleEmployee_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
 		{
 			StreamName:    "GetEmployee",
 			Handler:       _EmployeeService_GetEmployee_Handler,

@@ -27,24 +27,43 @@ func main(){
 	//callSayHelloBidirStream(client, names)
 
 	client := proto.NewEmployeeServiceClient(conn)
-	employee := &proto.EmployeeRequest{
+	/*employee := &proto.EmployeeRequest{
 		Id: 1,
 		Name: "Puneet Sharma",
 		Email: "puneet@gmail.com",
 		Phone: "9677355991",
 	}
+*/
+	//callCreateEmployee(client, employee)
 
-	callCreateEmployee(client, employee)
-
-	employee = &proto.EmployeeRequest{
+	/*employee = &proto.EmployeeRequest{
 		Id: 2,
 		Name: "Mahesh Sharma",
 		Email: "mahesh@gmail.com",
 		Phone: "9828279408",
+	}*/
+
+	//callCreateEmployee(client, employee)
+	time.Sleep(2*time.Second)
+	var employees = &[]proto.EmployeeRequest{
+		{	Id: 3,
+			Name: "abc",
+			Email: "abc@gmail.com",
+			Phone: "9999999999",
+		},
+		{	Id: 4,
+			Name: "xyz",
+			Email: "axyzbc@gmail.com",
+			Phone: "8888888888",
+		},
+		{	Id: 5,
+			Name: "asd",
+			Email: "asd@gmail.com",
+			Phone: "7777777777",
+		},
 	}
 
-	callCreateEmployee(client, employee)
-	time.Sleep(2*time.Second)
+	callCreateMultipleEmployee(client, employees)
 	callGetEmployees(client)
 
 }

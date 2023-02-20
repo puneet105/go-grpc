@@ -6,6 +6,9 @@ package employee_service;
 
 service EmployeeService{
   rpc CreateEmployee(EmployeeRequest) returns (EmployeeResponse);
+
+  rpc CreateMultipleEmployee(stream EmployeeRequest) returns (stream EmployeeResponse);
+
   rpc GetEmployee(NoParams) returns (stream EmployeeRequest);
 }
 
